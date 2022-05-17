@@ -3,19 +3,31 @@ from django.contrib.auth.models import AbstractUser
 # # Create your models here.
 
 
+
 class User(AbstractUser):
+    # ADMIN = 'admin'
+
     username = models.CharField(unique=True, max_length=150)
-    email = models.EmailField(unique=True, max_length=254)
+    email = models.EmailField(unique=True, max_length=254, validators=[])
     # phone = models.CharField(unique=True, max_length=11)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     password = models.CharField(max_length=150)
-    favorite = models.ManyToManyField()
-    subscribers = models.ManyToManyField()
-    shopping_cart = models.ManyToManyField()
+    # favorite = models.ManyToManyField(Recipes, related_name='favorite_user', blank=True, null=True)
+    # subscribers = models.ManyToManyField('self', related_name='subscribers', blank=True, null=True)
+    # shopping_cart = models.ManyToManyField(Recipes, related_name='shopping_cart', blank=True, null=True)
+    # вообще паходу рпасчетное поле оно тут и не нужно наверно.
+    admin = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
-    EMAIL_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    def __str__(self):
+        return self.username
+
+    @property
+    def is_admin(self):
+        return self.admin or self.is_superuser
 
 #
 # class User(AbstractUser):

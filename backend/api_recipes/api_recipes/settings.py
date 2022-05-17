@@ -27,10 +27,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'colorfield'
+    'colorfield',
     'djoser',
-    'users',
-    'recipes',
+    'users.apps.UsersConfig',
+    'recipes.apps.RecipesConfig',
 ]
 
 MIDDLEWARE = [
@@ -125,4 +125,16 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# AUTHENTICATION_BACKENDS = (
+#     # 'django_python3_ldap.auth.LDAPBackend',
+#     'django.contrib.auth.backends.ModelBackend',
+# )
 AUTH_USER_MODEL = 'users.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
