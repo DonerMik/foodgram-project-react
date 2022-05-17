@@ -54,7 +54,7 @@ class Recipes(models.Model):
     text = models.TextField()
     ingredients = models.ManyToManyField(Ingredient,
                                          through='IngredientsRecipe',
-                                         through_fields=('recipe', 'ingredient'),
+                                         # through_fields=('recipe', 'ingredient'),
                                          )
     tags = models.ManyToManyField('Tag', related_name='recipes')  #write correct
     cooking_time = models.IntegerField(validators=[MinValueValidator(1)]) #write count minut >=1

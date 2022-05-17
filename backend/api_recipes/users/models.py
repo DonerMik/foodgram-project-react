@@ -7,7 +7,7 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     # ADMIN = 'admin'
 
-    username = models.CharField(unique=True, max_length=150)
+    username = models.CharField(unique=True, max_length=150, default=None)
     email = models.EmailField(unique=True, max_length=254, validators=[])
     # phone = models.CharField(unique=True, max_length=11)
     first_name = models.CharField(max_length=150)
@@ -19,8 +19,8 @@ class User(AbstractUser):
     # вообще паходу рпасчетное поле оно тут и не нужно наверно.
     admin = models.BooleanField(default=False)
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
 
     def __str__(self):
         return self.username
