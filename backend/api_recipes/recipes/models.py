@@ -21,12 +21,14 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=200,
-                            unique=True,
                             db_index=True,
                             )
     measurement_unit = models.CharField(max_length=30,
                                         )
 
+    class Meta:
+        constraints = (models.UniqueConstraint(
+            fields=['name', 'measurement_unit'], name='unique ingredient'),)
 
     # Color objects are serialized into 'rgb(#, #, #)' notation.
     # def to_representation(self, value):
@@ -54,9 +56,15 @@ class Recipes(models.Model):
     text = models.TextField()
     ingredients = models.ManyToManyField(Ingredient,
                                          through='IngredientsRecipe',
-                                         # through_fields=('recipe', 'ingredient'),
+                                         through_fields=('recipe', 'ingredient'),
+                                         blank=True,
+
+
                                          )
-    tags = models.ManyToManyField('Tag', related_name='recipes')  #write correct
+    tags = models.ManyToManyField('Tag', related_name='recipes',
+                                  blank=True,
+
+                                  )  #write correct
     cooking_time = models.IntegerField(validators=[MinValueValidator(1)]) #write count minut >=1
     pub_date = models.DateTimeField(auto_now_add=True)
 
@@ -94,6 +102,7 @@ class Favorite(models.Model):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              related_name='favorit_recipe',
+
                              )
     recipes = models.ForeignKey(Recipes,
                                 on_delete=models.CASCADE,
@@ -102,7 +111,7 @@ class Favorite(models.Model):
 
     class Meta:
         constraints = (models.UniqueConstraint(
-            fields=['user', 'recipes'], name='unique favorite'),)
+            fields=['user', 'recipes'], name='unique favorited'),)
 
 
 class ShoppingCart(models.Model):
