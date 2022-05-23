@@ -42,7 +42,7 @@ class UserCustomSerializer(UserSerializer):
         username = self.context.get('request').user
         # user = self.request.user
         obj_user = User.objects.get(username=username)
-        if obj.id in obj_user.follower.all():
+        if obj_user.follower.filter(author=obj.id).exists():
             return True
         return False
     # нужно добвать если связь есть то Тру иначе фолс
