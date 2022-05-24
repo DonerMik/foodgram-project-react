@@ -49,6 +49,7 @@ class UserCustomSerializer(UserSerializer):
     # достать юзера нуждно
 
 
+
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -65,13 +66,16 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientsRecipeSerializer(serializers.ModelSerializer):
-
+    id = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
     measurement_unit = serializers.SerializerMethodField()
 
     class Meta:
         model = IngredientsRecipe
-        fields = ['ingredient', 'name', 'measurement_unit', 'amount']
+        fields = ['id', 'name', 'measurement_unit', 'amount']
+
+    def get_id(self, obj):
+        return obj.ingredient.id
 
     def get_name(self, obj):
         return obj.ingredient.name
@@ -87,7 +91,6 @@ class RecipesSerializer(serializers.ModelSerializer):
                                               many=True, source='all_ingredients')
     tags = TagSerializer(many=True,
                          read_only=True)
-    # subscribe = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
@@ -102,7 +105,6 @@ class RecipesSerializer(serializers.ModelSerializer):
         user = self.context.get('request').user
         author = User.objects.get(username=user)
         if obj.favorit_user.filter(user=author).exists():
-        # if author in obj.favorit_user.all():
             return True
         return False
 
@@ -110,16 +112,13 @@ class RecipesSerializer(serializers.ModelSerializer):
         user = self.context.get('request').user
         author = User.objects.get(username=user)
         if obj.shopping_user.filter(user=author).exists():
-
             return True
         return False
-
 
     def create(self, validated_data):
         """
         Create and return a new `Snippet` instance, given the validated data.
         """
-        # if 'ingredients' not in self.initial_data:
         user = self.context.get('request').user
         author = User.objects.get(username=user)
         ingredients = self.initial_data.pop('ingredients')
@@ -171,9 +170,38 @@ class RecipesSerializer(serializers.ModelSerializer):
         return instance
 
 
+class RecipesShortSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipes
+        fields = ('id', 'name', 'image', 'cooking_time')
 
 
-    # def create(self, validated_data):
+class UsersSubscriptionsSerializer(UserCustomSerializer):
+
+    recipes = RecipesShortSerializer(many=True, read_only=True)
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ('email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed',
+                  'recipes', 'recipes_count')
+
+    def get_recipes_count(self, obj):
+        # user = self.context.get('request').user
+        author = User.objects.get(pk=obj.pk)
+        recipes_count = author.recipes.all().count()
+        return recipes_count
+
+    def get_is_subscribed(self, obj):
+        # наверно нужно будет перенастрить тут так сбе енаписан и непонятно
+        # username = obj.username
+        # user = self.request.user
+        obj_user = User.objects.get(pk=obj.pk)
+        if obj_user.follower.filter(author=obj.id).exists():
+            return True
+        return False
+
+        # def create(self, validated_data):
     #     # Если в исходном запросе не было поля achievements
     #     if 'achievements' not in self.initial_data:
     #         # То создаём запись о котике без его достижений
