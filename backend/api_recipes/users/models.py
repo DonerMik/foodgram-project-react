@@ -1,11 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 # # Create your models here.
-
+from django.core.validators import validate_slug, RegexValidator
 
 class User(AbstractUser):
     email = models.EmailField(unique=True, max_length=254, validators=[])
-    username = models.CharField(unique=True, max_length=150, default=None)
+    username = models.CharField(unique=True, max_length=150)
     # phone = models.CharField(unique=True, max_length=11)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)

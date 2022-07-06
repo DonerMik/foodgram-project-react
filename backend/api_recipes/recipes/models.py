@@ -4,6 +4,9 @@ from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     validate_slug)
 from colorfield.fields import ColorField
 
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
+
+
 User = get_user_model()
 
 

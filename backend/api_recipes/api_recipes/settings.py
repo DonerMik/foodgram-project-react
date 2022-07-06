@@ -14,7 +14,10 @@ SECRET_KEY = 'django-insecure-mh%ka$du9=fj@+!lpvu^*5-&-so$5@mg&w9tbqdfo++h#y!azy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost'
+]
 
 
 # Application definition
@@ -27,18 +30,20 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     'rest_framework.authtoken',
     'colorfield',
-    'djoser',
     'users.apps.UsersConfig',
+    'djoser',
     'recipes.apps.RecipesConfig',
     'api.apps.ApiConfig',
-    'django_filters'
+    'django_filters',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -137,30 +142,52 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # )
 AUTH_USER_MODEL = 'users.User'
 
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_URLS_REGEX = r'^/api/.*$'
+DJOSER = {
+    'HIDE_USERS': False,
+    'PERMISSIONS': {
+        # 'activation': ['rest_framework.permissions.AllowAny'],
+        # 'password_reset': ['rest_framework.permissions.AllowAny'],
+        # 'password_reset_confirm': ['rest_framework.permissions.AllowAny'],
+        # 'set_password': ['rest_framework.permissions.CurrentUserOrAdmin'],
+        # 'username_reset': ['rest_framework.permissions.AllowAny'],
+        # 'username_reset_confirm': ['rest_framework.permissions.AllowAny'],
+        # 'set_username': ['rest_framework.permissions.CurrentUserOrAdmin'],
+        # 'user_create': ['rest_framework.permissions.AllowAny'],
+        # 'user_delete': ['rest_framework.permissions.CurrentUserOrAdmin'],
+        'user': ['rest_framework.permissions.IsAuthenticated'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+        # 'token_create': ['rest_framework.permissions.AllowAny'],
+        # 'token_destroy': ['rest_framework.permissions.IsAuthenticated'],
+    },
+
+    'SERIALIZERS': {
+        'user': 'api.serializers.UserCustomSerializer',
+        'current_user': 'api.serializers.UserCustomSerializer',
+    },
+}
+
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ],
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS':
-        'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100,
+        'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
     ]
 }
 
-# DJOSER = {
-#
-#     'SERIALIZERS': {
-#         'user': 'djoser.serializers.UserSerializer',
-#         'current_user': 'djoser.serializers.UserSerializer',
-#     },
-# }
+
+
 
 # REST_FRAMEWORK = {
 #     'DEFAULT_PERMISSION_CLASSES': [

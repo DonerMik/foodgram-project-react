@@ -40,18 +40,18 @@ class UserCustomSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         # наверно нужно будет перенастрить тут так сбе енаписан и непонятно
         username = self.context.get('request').user
-        # user = self.request.user
-        obj_user = User.objects.get(username=username)
-        if obj_user.follower.filter(author=obj.id).exists():
-            return True
+        # print('FFFFFFFFFFFFFFFFFFFFFFF')
+        # print(self.context['request'].user.is_authenticated)
+        if username.is_authenticated:
+            obj_user = User.objects.get(username=username)
+            if obj_user.follower.filter(author=obj.id).exists():
+                return True
         return False
     # нужно добвать если связь есть то Тру иначе фолс
     # достать юзера нуждно
 
 
-
 class TagSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
@@ -102,17 +102,26 @@ class RecipesSerializer(serializers.ModelSerializer):
                   )
 
     def get_is_favorited(self, obj):
-        user = self.context.get('request').user
-        author = User.objects.get(username=user)
-        if obj.favorit_user.filter(user=author).exists():
-            return True
+
+        # наверно нужно будет перенастрить тут так сбе енаписан и непонятно
+        username = self.context.get('request').user
+        print('FFFFFFFFFFFFFFFFFFFFFFF')
+        print(self.context['request'].user.is_authenticated)
+        if username.is_authenticated:
+            obj_user = User.objects.get(username=username)
+            if obj_user.favorit_recipe.filter(recipes=obj.id).exists():
+                return True
         return False
 
     def get_is_in_shopping_cart(self, obj):
-        user = self.context.get('request').user
-        author = User.objects.get(username=user)
-        if obj.shopping_user.filter(user=author).exists():
-            return True
+        # наверно нужно будет перенастрить тут так сбе енаписан и непонятно
+        username = self.context.get('request').user
+        print('FFFFFFFFFFFFFFFFFFFFFFF')
+        print(self.context['request'].user.is_authenticated)
+        if username.is_authenticated:
+            obj_user = User.objects.get(username=username)
+            if obj_user.shopping_cart.filter(recipes=obj.id).exists():
+                return True
         return False
 
     def create(self, validated_data):

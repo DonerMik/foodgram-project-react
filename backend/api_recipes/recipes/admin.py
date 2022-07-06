@@ -22,17 +22,22 @@ class IngredientsAdmin(admin.ModelAdmin):
 class RecipesAdmin(admin.ModelAdmin):
     # list_display = ('pk', 'author', 'name',  'image', 'ingredients',
     #                 'tags', 'cooking_time', 'pub_date',)
-    # допистаь из фаворит и из шоппин
+    list_display = ('author', 'name', 'add_favorite',)
 
-    search_fields = ('description',)
-    list_filter = ('author',)
+    search_fields = ('author', 'name', 'tags')
+    list_filter = ('author', 'name',)
     empty_value_display = '-пусто-'
+
+    def add_favorite(self, obj):
+        return obj.favorites.count()
+    add_favorite.short_description = 'Добавлено в избранное'
 
 
 class IngredientsRecipeAdmin(admin.ModelAdmin):
     list_display = ('recipe', 'ingredient', 'amount')
     search_fields = ('ingredient',)
     empty_value_display = '-пусто-'
+
 
 
 class SubscribeAdmin(admin.ModelAdmin):
