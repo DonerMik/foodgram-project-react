@@ -1,33 +1,10 @@
-import base64
-from datetime import datetime
-from django.forms import ValidationError
-
-from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
-from recipes.models import Tag, Ingredient, Recipes, IngredientsRecipe
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from recipes.models import Ingredient, IngredientsRecipe, Recipes, Tag
+from rest_framework import serializers
+
 User = get_user_model()
-
-
-# class Image(serializers.Field):
-#     def to_representation(self, value):
-#         return value
-#
-#     def to_internal_value(self, value):
-#         # name_file = data[-20:]
-#
-#         image_code = value.split('base64,')[1]
-#
-#         # with open(f'{datetime.now()}.png', 'wb', encoding='utf8') as w:
-#         image = base64.b64decode(image_code)
-#            w.write(image)
-#         # fh = open('asd.png', 'wb')
-#         # with open(f"{data}.jpg", "wb", encoding="ascii", errors='ignore') as f:
-#         #     f.write(data.decode('base64'))
-#         # return f'{data}.jpg'
-#         return image
 
 
 class UserCustomSerializer(UserSerializer):
@@ -38,17 +15,13 @@ class UserCustomSerializer(UserSerializer):
         fields = ['email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed']
 
     def get_is_subscribed(self, obj):
-        # наверно нужно будет перенастрить тут так сбе енаписан и непонятно
         username = self.context.get('request').user
-        # print('FFFFFFFFFFFFFFFFFFFFFFF')
-        # print(self.context['request'].user.is_authenticated)
         if username.is_authenticated:
             obj_user = User.objects.get(username=username)
             if obj_user.follower.filter(author=obj.id).exists():
                 return True
         return False
-    # нужно добвать если связь есть то Тру иначе фолс
-    # достать юзера нуждно
+
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -60,9 +33,7 @@ class TagSerializer(serializers.ModelSerializer):
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = ('name', 'measurement_unit')
-
-# Тут будет какае т дичь нужно разобраться и углубиться со связами и тд
+        fields = ('id', 'name', 'measurement_unit')
 
 
 class IngredientsRecipeSerializer(serializers.ModelSerializer):

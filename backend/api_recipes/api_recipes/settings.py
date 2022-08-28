@@ -1,10 +1,12 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+load_dotenv()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -16,7 +18,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
-    'localhost'
+    'localhost',
+    # '51.250.100.63',
 ]
 
 
@@ -83,12 +86,24 @@ WSGI_APPLICATION = 'api_recipes.wsgi.application'
 #         'PORT': os.getenv('DB_PORT')
 #     }
 # }
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+# DATABASES = {
+#     'default': {
+#             'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+#             'NAME': os.getenv('DB_NAME', default='postgres'),
+#             'USER': os.getenv('POSTGRES_USER', default='postgres'),
+#             'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
+#             'HOST': os.getenv('DB_HOST', default='db'),
+#             'PORT': os.getenv('DB_PORT')
+#     }
+# }
 
 
 # Password validation
@@ -129,7 +144,8 @@ USE_TZ = True
 
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

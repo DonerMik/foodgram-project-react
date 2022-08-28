@@ -1,11 +1,9 @@
+from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
-from django.db import models
 from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     validate_slug)
-from colorfield.fields import ColorField
-
-from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
-
+from django.db import models
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 
 User = get_user_model()
 
@@ -130,29 +128,3 @@ class ShoppingCart(models.Model):
     class Meta:
         constraints = (models.UniqueConstraint(
             fields=['user', 'recipes'], name='unique shopping'),)
-
-# shopping_cart = models.ManyToManyField(Recipes, related_name='shopping_cart', blank=True, null=True)
-#     кодирование картинки  BASE64
-# При публикации рецепта фронтенд кодирует картинку в строку base64;
-# на бэкенде её необходимо декодировать и сохранить как файл.
-
-# Для этого будет удобно создать кастомный
-# тип поля для картинки, переопределив метод сериализатора to_internal_value
-#     переопределить мета по дате публикации
-#  обрабатывается ошибка 404
-# все поля обязательны для заполнения настроить ману то ману
-# кукинтайм как выбрать мб интегерфилд
-# Для сохранения ингредиентов и тегов
-# рецепта потребуется переопределить методы create и update в ModelSerializer.
-# Согласно спецификации, обновление рецептов должно быть реализовано через PATCH,
-# значит, при редактировании все поля модели рецепта должны полностью перезаписываться.
-# Используйте подходящие типы related-полей;
-# для некоторых данных вам потребуется использовать SerializerMethodField.
-# Во вьюсетах вам потребуется добавлять дополнительные action.
-# Не забывайте о том, что для разных action сериализаторы и уровни доступа (permissions)
-# могут отличаться.
-# Некоторые методы, в том числе и action, могут быть похожи друг на друга.
-# Избегайте дублирующегося кода.
-
-
-#  можнт бвыть когда будет выдоча бюудем проверять есть ли у юзера данное ид рецепта

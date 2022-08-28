@@ -1,67 +1,34 @@
-
 from django.contrib import admin
+from recipes.models import (Favorite, Ingredient, IngredientsRecipe, Recipes,
+                            ShoppingCart, Subscribe, Tag)
 
-# from api.views import Ingredients
-from .models import Tag, Recipes, IngredientsRecipe, Subscribe, Favorite, ShoppingCart, Ingredient
 
-
+@admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'slug', 'color')
-    search_fields = ('name',)
-    list_filter = ('name',)
-    empty_value_display = '-пусто-'
+    list_display = ('name', 'color', 'slug')
 
 
-class IngredientsAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'measurement_unit')
-    search_fields = ('name',)
-    list_filter = ('name',)
-    empty_value_display = '-пусто-'
-
-
+@admin.register(Recipes)
 class RecipesAdmin(admin.ModelAdmin):
-    # list_display = ('pk', 'author', 'name',  'image', 'ingredients',
-    #                 'tags', 'cooking_time', 'pub_date',)
-    list_display = ('author', 'name', 'add_favorite',)
-
+    list_display = ('name', 'author', 'add_favorite')
     search_fields = ('author', 'name', 'tags')
-    list_filter = ('author', 'name',)
-    empty_value_display = '-пусто-'
+    ordering = ('-id',)
 
     def add_favorite(self, obj):
         return obj.favorites.count()
     add_favorite.short_description = 'Добавлено в избранное'
 
 
-class IngredientsRecipeAdmin(admin.ModelAdmin):
-    list_display = ('recipe', 'ingredient', 'amount')
-    search_fields = ('ingredient',)
-    empty_value_display = '-пусто-'
+@admin.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = ('name', 'measurement_unit')
+    search_fields = ('name',)
 
 
+admin.site.register(Favorite)
+admin.site.register(Subscribe)
+admin.site.register(ShoppingCart)
+admin.site.register(IngredientsRecipe)
 
-class SubscribeAdmin(admin.ModelAdmin):
-    list_display = ('user', 'author')
-    search_fields = ('user',)
-    empty_value_display = '-пусто-'
-
-
-class FavoriteAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipes')
-    search_fields = ('user',)
-    empty_value_display = '-пусто-'
-
-
-class ShoppingCartAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipes')
-    search_fields = ('user',)
-    empty_value_display = '-пусто-'
-
-
-admin.site.register(Tag, TagAdmin)
-admin.site.register(Ingredient, IngredientsAdmin)
-admin.site.register(Recipes, RecipesAdmin)
-admin.site.register(IngredientsRecipe, IngredientsRecipeAdmin)
-admin.site.register(Subscribe, SubscribeAdmin)
-admin.site.register(Favorite, FavoriteAdmin)
-admin.site.register(ShoppingCart, ShoppingCartAdmin)
+admin.site.site_title = 'Админ-панель сайта Foodgram'
+admin.site.site_header = 'Админ-панель сайта Foodgram'

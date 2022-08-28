@@ -1,7 +1,6 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
-# # Create your models here.
-from django.core.validators import validate_slug, RegexValidator
+from django.db import models
+
 
 class User(AbstractUser):
     email = models.EmailField(unique=True, max_length=254, validators=[])
@@ -10,10 +9,6 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     password = models.CharField(max_length=150)
-    # favorite = models.ManyToManyField(Recipes, related_name='favorite_user', blank=True, null=True)
-    # subscribers = models.ManyToManyField('self', related_name='subscribers', blank=True, null=True)
-    # shopping_cart = models.ManyToManyField(Recipes, related_name='shopping_cart', blank=True, null=True)
-    # вообще паходу рпасчетное поле оно тут и не нужно наверно.
     admin = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
