@@ -1,9 +1,8 @@
 from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
-from django.core.validators import (MaxValueValidator, MinValueValidator,
+from django.core.validators import (MinValueValidator,
                                     validate_slug)
 from django.db import models
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 
 User = get_user_model()
 
@@ -31,16 +30,6 @@ class Ingredient(models.Model):
         constraints = (models.UniqueConstraint(
             fields=['name', 'measurement_unit'], name='unique ingredient'),)
 
-    # Color objects are serialized into 'rgb(#, #, #)' notation.
-    # def to_representation(self, value):
-    #     return "rgb(%d, %d, %d)" % (value.red, value.green, value.blue)
-    #
-    # # "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg=="
-    # def to_internal_value(self, data):
-    #     data = data.strip('rgb(').rstrip(')')
-    #     red, green, blue = [int(col) for col in data.split(',')]
-    #     return Color(red, green, blue)
-
 
 class Recipes(models.Model):
     author = models.ForeignKey(User,
@@ -64,9 +53,8 @@ class Recipes(models.Model):
                                          )
     tags = models.ManyToManyField('Tag', related_name='recipes',
                                   blank=True,
-
-                                  )  #write correct
-    cooking_time = models.IntegerField(validators=[MinValueValidator(1)]) #write count minut >=1
+                                  )
+    cooking_time = models.IntegerField(validators=[MinValueValidator(1)])
     pub_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
