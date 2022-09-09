@@ -18,8 +18,28 @@ from api.serializers import (IngredientSerializer, RecipesSerializer,
 
 User = get_user_model()
 
+class CreateOrDeleteMixIn:
+    ''' Миксин создает или удаляет объект одного класса.
+    Возвращает Response'''
 
-class UserCustomViewSet(UserViewSet):
+    @staticmethod
+    def create_or_delete_obj(self, request, cls,
+                             serializer, obj_2):
+        '''Функция создает модели с двумя полями.
+        Первое из которых поле user'''
+        sub_user = User.objects.get_objects_or_404(id=id)
+        serializer = serializer(request.user)
+        if request.method == "POST":
+            cls.objects.create(request.user, obj_2)
+            return Response(serializer.data)
+        cls.objects.get(request.user, sub_user).delete()
+        return Response('serializer.errors, удален')
+#вставить и обработать миксин
+    class Meta:
+        abstract = True
+
+
+class UserCustomViewSet(UserViewSet, CreateOrDeleteMixIn):
     queryset = User.objects.all()
     serializer_class = UserCustomSerializer
     pagination_class = CustomPagination
@@ -32,6 +52,7 @@ class UserCustomViewSet(UserViewSet):
 
     @action(detail=True, methods=['post', 'delete'])
     def subscribe(self, request, id=None):
+
         obj_user = request.user
         sub_user = User.objects.get_objects_or_404(id=id)
         serializer = UsersSubscriptionsSerializer(obj_user)
@@ -60,7 +81,7 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
 
-class RecipesViewSet(viewsets.ModelViewSet):
+class RecipesViewSet(viewsets.ModelViewSet, CreateOrDeleteMixIn):
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
     pagination_class = CustomPagination
@@ -72,9 +93,13 @@ class RecipesViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         return get_pdf()
 
-    @action(detail=True, methods=['post', 'delete'], permission_classes=[IsAuthenticated])
-    def shopping_cart(self, request, pk=None):
 
+
+
+    @action(detail=True, methods=['post', 'delete'],
+            permission_classes=[IsAuthenticated])
+    def shopping_cart(self, request, pk=None):
+        return self.create_or_delete_obj()
         obj_user = request.user
         recipe = Recipes.objects.get(pk=pk)
         serializer = RecipesShortSerializer(recipe)
@@ -87,14 +112,15 @@ class RecipesViewSet(viewsets.ModelViewSet):
                                  recipes=recipe).delete()
         return Response('serializer.errors, удален')
 
-    @action(detail=True, methods=['post', 'delete'],permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post', 'delete'],
+            permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
         obj_user = request.user(self, request)
         recipe = Recipes.objects.get(pk=pk)
         serializer = RecipesShortSerializer(recipe)
         if request.method == "POST":
             Favorite.objects.create(user=obj_user,
-                                        recipes=recipe)
+                                    recipes=recipe)
 
             return Response(serializer.data)
         Favorite.objects.get(user=obj_user,
