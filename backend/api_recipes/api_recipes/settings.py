@@ -12,15 +12,13 @@ load_dotenv()
 SECRET_KEY = 'django-insecure-mh%ka$du9=fj@+!lpvu^*5-&-so$5@mg&w9tbqdfo++h#y!azy'
 
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    # '51.250.100.63',
+    '51.250.106.186'
 ]
-
-
 
 
 INSTALLED_APPS = [

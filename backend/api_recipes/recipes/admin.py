@@ -26,7 +26,13 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-admin.site.register(Favorite)
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ('user', 'recipe',)
+    list_filter = ('user', 'recipe',)
+
+
+# admin.site.register(Favorite)
 admin.site.register(Subscribe)
 admin.site.register(ShoppingCart)
 admin.site.register(IngredientsRecipe)
