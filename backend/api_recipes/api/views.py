@@ -7,14 +7,15 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from api.utils import get_pdf
-from recipes.models import (Favorite, Ingredient, IngredientsRecipe, Recipes,
+from recipes.models import (Favorite, Ingredient, Recipes,
                             ShoppingCart, Subscribe, Tag)
 from api.filter import IngredientsFilter, RecipesFilter
 from api.paginator import CustomPagination
 from api.permissions import AuthorOrReadOnly
 from api.serializers import (IngredientSerializer, RecipesSerializer,
                              RecipesShortSerializer, TagSerializer,
-                             UserCustomSerializer, UsersSubscriptionsSerializer)
+                             UserCustomSerializer,
+                             UsersSubscriptionsSerializer)
 
 User = get_user_model()
 
@@ -85,7 +86,7 @@ class RecipesViewSet(viewsets.ModelViewSet, CreateOrDeleteMixIn):
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
     pagination_class = CustomPagination
-    filter_backends = [DjangoFilterBackend,]
+    filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipesFilter
     permission_classes = [AuthorOrReadOnly]
 

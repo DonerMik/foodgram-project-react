@@ -53,8 +53,10 @@ class IngredientsRecipeSerializer(serializers.ModelSerializer):
 class RecipesSerializer(serializers.ModelSerializer):
     author = UserCustomSerializer(read_only=True)
     image = Base64ImageField()
-    ingredients = IngredientsRecipeSerializer(read_only=True,
-                                              many=True, source='all_ingredients')
+    ingredients = IngredientsRecipeSerializer(
+        read_only=True,
+        many=True,
+        source='all_ingredients')
     tags = TagSerializer(many=True,
                          read_only=True)
     is_favorited = serializers.SerializerMethodField(read_only=True)
@@ -121,7 +123,8 @@ class RecipesSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-        Create and return a new `Snippet` instance, given the validated data.
+        Create and return a new `Snippet` instance,
+         given the validated data.
         """
         user = self.context.get('request').user
         author = User.objects.get(username=user)
@@ -146,14 +149,17 @@ class RecipesSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """
-        Update and return an existing `Snippet` instance, given the validated data.
+        Update and return an existing `Snippet` instance,
+        given the validated data.
         """
         ingredients = self.initial_data.pop('ingredients')
         tags = self.initial_data.pop('tags')
         instance.name = validated_data.get('name', instance.name)
         instance.image = validated_data.get('image', instance.image)
         instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get('cooking_time', instance.cooking_time)
+        instance.cooking_time = validated_data.get(
+            'cooking_time',
+            instance.cooking_time)
         IngredientsRecipe.objects.filter(recipe=instance).delete()
         instance.tags.clear()
         for ingredient in ingredients:
@@ -186,8 +192,10 @@ class UsersSubscriptionsSerializer(UserCustomSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed',
-                  'recipes', 'recipes_count')
+        fields = ('email', 'id', 'username',
+                  'first_name', 'last_name',
+                  'is_subscribed', 'recipes',
+                  'recipes_count')
 
     def get_recipes_count(self, obj):
         author = self.context.get('request').user

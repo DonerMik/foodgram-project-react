@@ -58,11 +58,12 @@ class Recipes(models.Model):
     image = models.ImageField(upload_to='image/',
                               verbose_name='Изображение')
     text = models.TextField(verbose_name='Содержание')
-    ingredients = models.ManyToManyField(Ingredient,
-                                         verbose_name='Ингридиенты',
-                                         through='IngredientsRecipe',
-                                         through_fields=('recipe', 'ingredient'),
-                                         )
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        verbose_name='Ингридиенты',
+        through='IngredientsRecipe',
+        through_fields=('recipe', 'ingredient'),
+    )
     tags = models.ManyToManyField('Tag', related_name='recipes',
                                   blank=True,
                                   )
@@ -78,9 +79,16 @@ class Recipes(models.Model):
 
 
 class IngredientsRecipe(models.Model):
-    recipe = models.ForeignKey(Recipes, related_name='all_ingredients', on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredient, related_name='recipe_id', on_delete=models.CASCADE)
-    amount = models.IntegerField(validators=[MinValueValidator(1)])
+    recipe = models.ForeignKey(
+        Recipes,
+        related_name='all_ingredients',
+        on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(
+        Ingredient,
+        related_name='recipe_id',
+        on_delete=models.CASCADE)
+    amount = models.IntegerField(
+        validators=[MinValueValidator(1)])
 
     class Meta:
         constraints = (models.UniqueConstraint(
