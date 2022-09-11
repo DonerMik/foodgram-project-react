@@ -150,7 +150,7 @@ class RecipesSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         """
         Update and return an existing `Snippet` instance,
-        given the validated data.
+        given the validated data...
         """
         ingredients = self.initial_data.pop('ingredients')
         tags = self.initial_data.pop('tags')
