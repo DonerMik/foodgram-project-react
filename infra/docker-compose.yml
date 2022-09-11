@@ -8,7 +8,7 @@ services:
       - ./.env
 
   backend:
-    build: donermik/fg_backend:latest/
+    image: donermik/fg_backend:latest/
     restart: always
     volumes:
       - static_value:/app/static/
@@ -19,12 +19,11 @@ services:
       - ./.env
 
   frontend:
-    build:
-      context: donermik/fg_frontend:latest
-      dockerfile: Dockerfile
+    image: donermik/fg_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
-
+    depends_on:
+      - db
   nginx:
     image: nginx:1.21.3-alpine
     ports:
