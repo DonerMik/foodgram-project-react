@@ -45,7 +45,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          context: ./backend/
+          context: ./backend/api_recipes/
           tags: ${{ secrets.DOCKER_USERNAME }}/fg_backend:latest
 
       - name: Push to DockerHub
