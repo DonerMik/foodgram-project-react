@@ -8,13 +8,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv()
 
+#
+# SECRET_KEY = os.getenv(
+#     'SECRET_KEY',
+#     default='django-insecure-mh%ka$du9=fj@+!lpvu^*5-&-so$5@mg&w9tbqdfo++h#y!azy')
 
-SECRET_KEY = os.getenv(
-    'SECRET_KEY',
-    default='django-insecure-mh%ka$du9=fj@+!lpvu^*5-&-so$5@mg&w9tbqdfo++h#y!azy')
+SECRET_KEY = 'django-insecure-mh%ka$du9=fj@+!lpvu^*5-&-so$5@mg&w9tbqdfo++h#y!azy'
 
-
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -73,14 +74,21 @@ TEMPLATES = [
 WSGI_APPLICATION = 'api_recipes.wsgi.application'
 
 
+# DATABASES = {
+#     'default': {
+#             'ENGINE': os.getenv('DB_ENGINE'),
+#             'NAME': os.getenv('DB_NAME'),
+#             'USER': os.getenv('POSTGRES_USER'),
+#             'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+#             'HOST': os.getenv('DB_HOST'),
+#             'PORT': os.getenv('DB_PORT')
+#     }
+# }
+
 DATABASES = {
     'default': {
-            'ENGINE': os.getenv('DB_ENGINE'),
-            'NAME': os.getenv('DB_NAME'),
-            'USER': os.getenv('POSTGRES_USER'),
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-            'HOST': os.getenv('DB_HOST'),
-            'PORT': os.getenv('DB_PORT')
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
