@@ -8,7 +8,7 @@ services:
       - ./.env
 
   backend:
-    build: donermik/fg_backend:latest
+    image: donermik/fg_backend:latest
     restart: always
     volumes:
       - static_value:/app/static/
@@ -29,7 +29,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/sudo
+      - ./nginx/default.conf:/etc/nginx/conf.d/
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
       - static_value:/var/html/static/
