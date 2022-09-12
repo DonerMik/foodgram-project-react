@@ -42,6 +42,7 @@ class UserCustomViewSet(UserViewSet, CreateOrDeleteMixIn):
     queryset = User.objects.all()
     serializer_class = UserCustomSerializer
     pagination_class = CustomPagination
+    permission_classes = [AllowAny]
 
     @action(detail=False)
     def subscriptions(self, request):
