@@ -8,7 +8,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         '''Функция загружает данные с json файла в базу данных Django'''
-        file = '/home/donermik/foodgram-project-react/data/ingredients.json'
+        file = 'data/ingredients.json'
         with open(file, 'r') as f:
             contents = json.loads(f.read())
 
