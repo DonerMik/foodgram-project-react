@@ -73,14 +73,16 @@ class CreateOrDeleteMixIn:
     ''' Миксин создает или удаляет объект одного класса.
     Возвращает Response'''
 
-    @staticmethod
-    def create_or_delete_obj(self, request, user, obj2, cls, serializer):
+    def create_or_delete_obj(self, request, pk, model):
         '''Метод создает объект с двумя полями.
         Первое из которых поле user'''
+        user = self.context.get('request').user
+        recipe = Recipes.objects.get(id=pk)
+        serializer = RecipesShortSerializer(recipe)
         if request.method == "POST":
-            cls.objects.create(user, obj2)
+            model.objects.create(user, recipe)
             return Response(serializer.data)
-        cls.objects.get(user, obj2).delete()
+        model.objects.get(user, recipe).delete()
         return Response('удален')
 
     class Meta:
@@ -102,11 +104,11 @@ class RecipesViewSet(viewsets.ModelViewSet, CreateOrDeleteMixIn):
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        user = request.user
-        recipe = Recipes.objects.get(pk=pk)
-        serializer = RecipesShortSerializer(recipe)
-        return self.create_or_delete_obj(
-            request, user, recipe, ShoppingCart, serializer)
+        # user = request.user
+        # recipe = Recipes.objects.get(pk=pk)
+        # serializer = RecipesShortSerializer(recipe)
+        # shiooin = ShoppingCart
+        return self.create_or_delete_obj(request, ShoppingCart, pk)
         # if request.method == "POST":
         #     ShoppingCart.objects.create(user=user,
         #                                 recipes=recipe)
@@ -126,7 +128,7 @@ class RecipesViewSet(viewsets.ModelViewSet, CreateOrDeleteMixIn):
         serializer = RecipesShortSerializer(recipe,
                                             context={'request': request})
         return self.create_or_delete_obj(
-            request, user, recipe, Favorite, serializer)
+            request, Favorite, pk)
         # if request.method == "POST":
         #     Favorite.objects.create(user=user,
         #                             recipes=recipe)

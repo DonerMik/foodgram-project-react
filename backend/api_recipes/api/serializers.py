@@ -72,7 +72,6 @@ class RecipesSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         username = self.context.get('request').user
         if username.is_authenticated:
-            # obj_user = User.objects.get(username=username)
             if username.favorit_recipe.filter(recipes=obj).exists():
                 return True
         return False
@@ -85,8 +84,8 @@ class RecipesSerializer(serializers.ModelSerializer):
                 return True
         return False
 
-    def validate(self, data):
-        ingredients_data = data.get('ingredients')
+    def validate(self, attrs):
+        ingredients_data = attrs['ingredients']
         ingredients = []
         for ingredient in ingredients_data:
             ingredient_id = ingredient['id']
@@ -100,7 +99,7 @@ class RecipesSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     'amount': 'Отрицательное количество ингредиентов'
                 })
-        tags = data.get('tags')
+        tags = attrs['tags']
         if not tags:
             raise serializers.ValidationError({
                 'tags': 'Выберите тег'
@@ -113,12 +112,12 @@ class RecipesSerializer(serializers.ModelSerializer):
                 })
             tags.append(tag)
 
-        cooking_time = data.get('cooking_time')
+        cooking_time = attrs['cooking_time']
         if int(cooking_time) <= 0:
             raise serializers.ValidationError({
                 'cooking_time': 'Отрицательное время'
             })
-        return data
+        return attrs
 
     def create(self, validated_data):
         """
@@ -127,8 +126,8 @@ class RecipesSerializer(serializers.ModelSerializer):
         """
         user = self.context.get('request').user
         author = User.objects.get(username=user)
-        ingredients = self.initial_data.pop('ingredients')
-        tags = self.initial_data.pop('tags')
+        ingredients = self.initial_data.get('ingredients')
+        tags = self.initial_data.get('tags')
         recipe = Recipes.objects.create(author=author, **validated_data)
         ingredients_recipe = []
         for ingredient in ingredients:

@@ -16,7 +16,6 @@ class RecipesFilter(FilterSet):
     is_in_shopping_cart = NumberFilter(method='filter_is_in_shopping_cart')
 
     def filter_is_favorited(self, queryset, name, value):
-        print(value)
         if not value:
             return queryset
         if value:
