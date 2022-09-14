@@ -101,11 +101,15 @@ class Subscribe(models.Model):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              related_name='follower',
+                             blank=True,
+                             null=True
                              )
     author = models.ForeignKey(User,
                                on_delete=models.CASCADE,
                                related_name='following',
                                verbose_name='Подписки',
+                               blank=True,
+                               null=True
                                )
 
     class Meta:
@@ -119,17 +123,21 @@ class Favorite(models.Model):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              related_name='favorit_recipe',
-                             verbose_name='пользователь'
+                             verbose_name='пользователь',
+                             blank=True,
+                             null=True
                              )
     recipes = models.ForeignKey(Recipes,
                                 on_delete=models.CASCADE,
                                 related_name='favorit_user',
-                                verbose_name='Рецепт'
+                                verbose_name='Рецепт',
+                                blank=True,
+                                null=True
                                 )
 
     class Meta:
         constraints = (models.UniqueConstraint(
-            fields=['user', 'recipes'], name='unique favorited'),)
+            fields=['user', 'recipes'], name='unique_favorited'),)
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
 
@@ -138,10 +146,14 @@ class ShoppingCart(models.Model):
     user = models.ForeignKey(User,
                              on_delete=models.CASCADE,
                              related_name='shopping_cart',
+                             blank=True,
+                             null=True
                              )
     recipes = models.ForeignKey(Recipes,
                                 on_delete=models.CASCADE,
                                 related_name='shopping_user',
+                                blank=True,
+                                null=True
                                 )
 
     class Meta:

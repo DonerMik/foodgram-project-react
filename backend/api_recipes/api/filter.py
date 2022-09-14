@@ -12,17 +12,25 @@ class RecipesFilter(FilterSet):
         queryset=Tag.objects.all()
     )
 
-    is_favorited = BooleanFilter(method='filter_is_favorited')
-    is_in_shopping_cart = BooleanFilter(method='filter_is_in_shopping_cart')
+    is_favorited = NumberFilter(method='filter_is_favorited')
+    is_in_shopping_cart = NumberFilter(method='filter_is_in_shopping_cart')
 
     def filter_is_favorited(self, queryset, name, value):
-        if value and not self.request.user.is_anonymous:
-            return queryset.filter(favorit_user__user=self.request.user)
-        return queryset
+        print(value)
+        if not value:
+            return queryset
+        if value:
+            favorits = self.request.user.favorit_recipe.all()
+            queryset = queryset.filter(
+                pk__in=(favorite.recipes.pk for favorite in favorits))
+            return queryset
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
+        user = self.request.user
         if value and not self.request.user.is_anonymous:
-            return queryset.filter(shopping_user__user=self.request.user)
+            shopping_user = user.shopping_cart.all()
+            return queryset.filter(
+                id__in=(i.recipes.pk for i in shopping_user))
         return queryset
 
     class Meta:

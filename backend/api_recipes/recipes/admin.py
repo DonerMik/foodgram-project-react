@@ -9,17 +9,6 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'color', 'slug')
 
 
-@admin.register(Recipes)
-class RecipesAdmin(admin.ModelAdmin):
-    list_display = ('name', 'author', 'add_favorite')
-    search_fields = ('author', 'name', 'tags')
-    ordering = ('-id',)
-
-    def add_favorite(self, obj):
-        return obj.favorites.count()
-    add_favorite.short_description = 'Добавлено в избранное'
-
-
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit')
@@ -30,6 +19,29 @@ class IngredientAdmin(admin.ModelAdmin):
 # class FavoriteAdmin(admin.ModelAdmin):
 #     list_display = ('user', 'recipe',)
 #     list_filter = ('user', 'recipe',)
+
+
+class IngredientInline(admin.TabularInline):
+    model = Recipes.ingredients.through
+
+
+class IngredintsAdmin(admin.ModelAdmin):
+    inlines = [IngredientInline,]
+
+
+@admin.register(Recipes)
+class RecipesAdmin(admin.ModelAdmin):
+    list_display = ('name', 'author', 'add_favorite')
+    search_fields = ('author', 'name', 'tags')
+    exclude = ('ingredients',)
+    inlines = [
+        IngredientInline
+    ]
+    ordering = ('-id',)
+
+    def add_favorite(self, obj):
+        return obj.favorit_user.count()
+    add_favorite.short_description = 'Добавлено в избранное'
 
 
 admin.site.register(Favorite)

@@ -3,7 +3,7 @@ from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
-from recipes.models import Ingredient, IngredientsRecipe, Recipes, Tag
+from recipes.models import Ingredient, IngredientsRecipe, Recipes, Tag, Subscribe
 
 User = get_user_model()
 
@@ -18,12 +18,12 @@ class UserCustomSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
-        if not user.is_authenticated:
-            return False
-        obj_user = User.objects.get(username=user)
-        if obj_user.follower.filter(author=obj.id).exists():
-            return True
-        return False
+        # if not user.is_authenticated:
+        #     return False
+        # # obj_user = User.objects.get(username=user)
+
+        return Subscribe.objects.filter(user=user, author=obj).exists()
+
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -72,8 +72,8 @@ class RecipesSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         username = self.context.get('request').user
         if username.is_authenticated:
-            obj_user = User.objects.get(username=username)
-            if obj_user.favorit_recipe.filter(recipes=obj.id).exists():
+            # obj_user = User.objects.get(username=username)
+            if username.favorit_recipe.filter(recipes=obj).exists():
                 return True
         return False
 
@@ -85,41 +85,41 @@ class RecipesSerializer(serializers.ModelSerializer):
                 return True
         return False
 
-    def validate(self, data):
-        ingredients = data.get('ingredients')
-        ingredients = []
-        for ingredient in ingredients:
-            ingredient_id = ingredient['id']
-            if ingredient_id in ingredients:
-                raise serializers.ValidationError({
-                    'ingredients': 'Ингридиент повторяется'
-                })
-            ingredients.append(ingredient_id)
-            amount = ingredient['amount']
-            if int(amount) <= 0:
-                raise serializers.ValidationError({
-                    'amount': 'Отрицательное количество ингредиентов'
-                })
-
-        tags = data.get('tags')
-        if not tags:
-            raise serializers.ValidationError({
-                'tags': 'Выберите тег'
-            })
-        tags = []
-        for tag in tags:
-            if tag in tags:
-                raise serializers.ValidationError({
-                    'tags': 'Тэг повторяется'
-                })
-            tags.append(tag)
-
-        cooking_time = data.get('cooking_time')
-        if int(cooking_time) <= 0:
-            raise serializers.ValidationError({
-                'cooking_time': 'Отрицательное время'
-            })
-        return data
+    # def validate(self, data):
+    #     ingredients = data.get('ingredients')
+    #     ingredients = []
+    #     for ingredient in ingredients:
+    #         ingredient_id = ingredient['id']
+    #         if ingredient_id in ingredients:
+    #             raise serializers.ValidationError({
+    #                 'ingredients': 'Ингридиент повторяется'
+    #             })
+    #         ingredients.append(ingredient_id)
+    #         amount = ingredient['amount']
+    #         if int(amount) <= 0:
+    #             raise serializers.ValidationError({
+    #                 'amount': 'Отрицательное количество ингредиентов'
+    #             })
+    #
+    #     tags = data.get('tags')
+    #     if not tags:
+    #         raise serializers.ValidationError({
+    #             'tags': 'Выберите тег'
+    #         })
+    #     tags = []
+    #     for tag in tags:
+    #         if tag in tags:
+    #             raise serializers.ValidationError({
+    #                 'tags': 'Тэг повторяется'
+    #             })
+    #         tags.append(tag)
+    #
+    #     cooking_time = data.get('cooking_time')
+    #     if int(cooking_time) <= 0:
+    #         raise serializers.ValidationError({
+    #             'cooking_time': 'Отрицательное время'
+    #         })
+    #     return data
 
     def create(self, validated_data):
         """
@@ -143,8 +143,8 @@ class RecipesSerializer(serializers.ModelSerializer):
             )
             )
         IngredientsRecipe.objects.bulk_create(ingredients_recipe)
-        for tag in tags:
-            recipe.tags_set.set(tag)
+        # for tag in tags:
+        recipe.tags.set(tags)
         return recipe
 
     def update(self, instance, validated_data):
@@ -172,9 +172,10 @@ class RecipesSerializer(serializers.ModelSerializer):
                 ingredient=recipe_ingredient,
                 amount=ingredient_amount
             )
-        for tag in tags:
-            tag_recipe = Tag.objects.get(id=tag)
-            instance.tags.add(tag_recipe)
+        # for tag in tags:
+        #     tag_recipe = Tag.objects.get(id=tag)
+        #     instance.tags.add(tag_recipe)
+        instance.tags.set(tags)
         instance.save()
         return instance
 
@@ -189,6 +190,7 @@ class UsersSubscriptionsSerializer(UserCustomSerializer):
 
     recipes = RecipesShortSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -203,5 +205,6 @@ class UsersSubscriptionsSerializer(UserCustomSerializer):
         return recipes_count
 
     def get_is_subscribed(self, obj):
-        obj_user = self.context.get('request').user
-        return obj_user.follower.filter(author=obj.id).exists()
+        user = self.context.get('request').user
+        return Subscribe.objects.filter(
+            author=user.id, user=obj.id).exists()

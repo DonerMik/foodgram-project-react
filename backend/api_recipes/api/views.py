@@ -5,6 +5,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 
 from api.utils import get_pdf
 from recipes.models import (Favorite, Ingredient, Recipes,
@@ -38,33 +39,40 @@ class CreateOrDeleteMixIn:
         abstract = True
 
 
-class UserCustomViewSet(UserViewSet, CreateOrDeleteMixIn):
+class UserCustomViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserCustomSerializer
     pagination_class = CustomPagination
     permission_classes = [AllowAny]
 
-    @action(detail=False)
+    @action(detail=False, pagination_class=CustomPagination)
     def subscriptions(self, request):
         obj_user = request.user
-        serializer = UsersSubscriptionsSerializer(obj_user)
-        return Response(serializer.data)
+        subscribers = obj_user.follower.all()
+        subscribers = User.objects.filter(
+            id__in=(subs.author.pk for subs in subscribers))
+        serializer = UsersSubscriptionsSerializer(
+            subscribers, context={'request': request}, many=True)
+        page = self.paginate_queryset(serializer.data)
+        return self.get_paginated_response(page)
 
-    @action(detail=True, methods=['post', 'delete'])
+    @action(detail=True, methods=['post', 'delete'],
+            pagination_class=CustomPagination)
     def subscribe(self, request, id=None):
         user = request.user
-        sub_user = User.objects.get_objects_or_404(id=id)
-        serializer = UsersSubscriptionsSerializer(user)
-        return self.create_or_delete_obj(request, user, sub_user,
-                                         Subscribe,
-                                         serializer)
-        # if request.method == "POST":
-        #     Subscribe.objects.create(user=obj_user,
-        #                              author=sub_user)
-        #     return Response(serializer.data)
-        # Subscribe.objects.get(user=obj_user,
-        #                       author=sub_user).delete()
-        # return Response('serializer.errors, удален')
+        sub_user = get_object_or_404(User, id=id)
+        serializer = UsersSubscriptionsSerializer(
+            user, context={'request': request})
+        # return self.create_or_delete_obj(request, user, sub_user,
+        #                                  Subscribe,
+        #                                  serializer)
+        if request.method == "POST":
+            Subscribe.objects.create(user=user,
+                                     author=sub_user)
+            return Response(serializer.data)
+        Subscribe.objects.get(user=user,
+                              author=sub_user).delete()
+        return Response('удален')
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -77,7 +85,7 @@ class TagViewSet(viewsets.ModelViewSet):
 class IngredientsViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    pagination_class = CustomPagination
+    pagination_class = None
     filter_backends = [DjangoFilterBackend]
     filterset_class = IngredientsFilter
     permission_classes = [AllowAny]
@@ -93,7 +101,7 @@ class RecipesViewSet(viewsets.ModelViewSet, CreateOrDeleteMixIn):
 
     @action(detail=False, permission_classes=[IsAuthenticated],)
     def download_shopping_cart(self, request):
-        return get_pdf()
+        return get_pdf(request)
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[IsAuthenticated])
@@ -101,33 +109,36 @@ class RecipesViewSet(viewsets.ModelViewSet, CreateOrDeleteMixIn):
         user = request.user
         recipe = Recipes.objects.get(pk=pk)
         serializer = RecipesShortSerializer(recipe)
-        return self.create_or_delete_obj(request, user, recipe,
-                                         ShoppingCart,
-                                         serializer)
+        # return self.create_or_delete_obj(request, user, recipe,
+        #                                  ShoppingCart,
+        #                                  serializer)
 
-        # if request.method == "POST":
-        #     ShoppingCart.objects.create(user=obj_user,
-        #                                 recipes=recipe)
-        #
-        #     return Response(serializer.data)
-        # ShoppingCart.objects.get(user=obj_user,
-        #                          recipes=recipe).delete()
-        # return Response('serializer.errors, удален')
+        if request.method == "POST":
+            ShoppingCart.objects.create(user=user,
+                                        recipes=recipe)
+
+            return Response(serializer.data)
+        ShoppingCart.objects.get(user=user,
+                                 recipes=recipe).delete()
+        return Response('удален')
 
     @action(detail=True, methods=['post', 'delete'],
-            permission_classes=[IsAuthenticated])
+            permission_classes=[IsAuthenticated],
+            filterset_class=RecipesFilter,
+            pagination_class=CustomPagination)
     def favorite(self, request, pk=None):
-        user = request.user(self, request)
+        user = request.user
         recipe = Recipes.objects.get(pk=pk)
-        serializer = RecipesShortSerializer(recipe)
-        return self.create_or_delete_obj(request, user,
-                                         recipe, Favorite,
-                                         serializer)
-        # if request.method == "POST":
-        #     Favorite.objects.create(user=obj_user,
-        #                             recipes=recipe)
-        #
-        #     return Response(serializer.data)
-        # Favorite.objects.get(user=obj_user,
-        #                          recipes=recipe).delete()
-        # return Response('serializer.errors, удален')
+        serializer = RecipesShortSerializer(recipe,
+                                            context={'request': request})
+        # return self.create_or_delete_obj(request, user,
+        #                                  recipe, Favorite,
+        #                                  serializer)
+        if request.method == "POST":
+            Favorite.objects.create(user=user,
+                                    recipes=recipe)
+
+            return Response(serializer.data)
+        Favorite.objects.get(user=user,
+                             recipes=recipe).delete()
+        return Response('удален')
