@@ -3,7 +3,8 @@ from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
-from recipes.models import Ingredient, IngredientsRecipe, Recipes, Tag, Subscribe
+from recipes.models import (Ingredient, IngredientsRecipe,
+                            Recipes, Tag, Subscribe)
 
 User = get_user_model()
 
@@ -23,7 +24,6 @@ class UserCustomSerializer(UserSerializer):
         # # obj_user = User.objects.get(username=user)
 
         return Subscribe.objects.filter(user=user, author=obj).exists()
-
 
 
 class TagSerializer(serializers.ModelSerializer):

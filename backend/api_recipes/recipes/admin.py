@@ -26,7 +26,7 @@ class IngredientInline(admin.TabularInline):
 
 
 class IngredintsAdmin(admin.ModelAdmin):
-    inlines = [IngredientInline,]
+    inlines = [IngredientInline, ]
 
 
 @admin.register(Recipes)
