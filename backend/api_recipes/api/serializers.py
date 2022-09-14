@@ -85,41 +85,40 @@ class RecipesSerializer(serializers.ModelSerializer):
                 return True
         return False
 
-    # def validate(self, data):
-    #     ingredients = data.get('ingredients')
-    #     ingredients = []
-    #     for ingredient in ingredients:
-    #         ingredient_id = ingredient['id']
-    #         if ingredient_id in ingredients:
-    #             raise serializers.ValidationError({
-    #                 'ingredients': 'Ингридиент повторяется'
-    #             })
-    #         ingredients.append(ingredient_id)
-    #         amount = ingredient['amount']
-    #         if int(amount) <= 0:
-    #             raise serializers.ValidationError({
-    #                 'amount': 'Отрицательное количество ингредиентов'
-    #             })
-    #
-    #     tags = data.get('tags')
-    #     if not tags:
-    #         raise serializers.ValidationError({
-    #             'tags': 'Выберите тег'
-    #         })
-    #     tags = []
-    #     for tag in tags:
-    #         if tag in tags:
-    #             raise serializers.ValidationError({
-    #                 'tags': 'Тэг повторяется'
-    #             })
-    #         tags.append(tag)
-    #
-    #     cooking_time = data.get('cooking_time')
-    #     if int(cooking_time) <= 0:
-    #         raise serializers.ValidationError({
-    #             'cooking_time': 'Отрицательное время'
-    #         })
-    #     return data
+    def validate(self, data):
+        ingredients_data = data.get('ingredients')
+        ingredients = []
+        for ingredient in ingredients_data:
+            ingredient_id = ingredient['id']
+            if ingredient_id in ingredients:
+                raise serializers.ValidationError({
+                    'ingredients': 'Ингридиент повторяется'
+                })
+            ingredients.append(ingredient_id)
+            amount = ingredient['amount']
+            if int(amount) <= 0:
+                raise serializers.ValidationError({
+                    'amount': 'Отрицательное количество ингредиентов'
+                })
+        tags = data.get('tags')
+        if not tags:
+            raise serializers.ValidationError({
+                'tags': 'Выберите тег'
+            })
+        tags = []
+        for tag in tags:
+            if tag in tags:
+                raise serializers.ValidationError({
+                    'tags': 'Тэг повторяется'
+                })
+            tags.append(tag)
+
+        cooking_time = data.get('cooking_time')
+        if int(cooking_time) <= 0:
+            raise serializers.ValidationError({
+                'cooking_time': 'Отрицательное время'
+            })
+        return data
 
     def create(self, validated_data):
         """
