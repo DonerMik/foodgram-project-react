@@ -123,10 +123,10 @@ class RecipesViewSet(viewsets.ModelViewSet, CreateOrDeleteMixIn):
             filterset_class=RecipesFilter,
             pagination_class=CustomPagination)
     def favorite(self, request, pk=None):
-        user = request.user
-        recipe = Recipes.objects.get(pk=pk)
-        serializer = RecipesShortSerializer(recipe,
-                                            context={'request': request})
+        # user = request.user
+        # recipe = Recipes.objects.get(pk=pk)
+        # serializer = RecipesShortSerializer(recipe,
+        #                                     context={'request': request})
         return self.create_or_delete_obj(
             request, Favorite, pk)
         # if request.method == "POST":

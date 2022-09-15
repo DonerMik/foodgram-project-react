@@ -30,6 +30,7 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
+        read_only_fields = ('name', 'color', 'slug')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -39,10 +40,10 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientsRecipeSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField(source='ingredient.id')
-    name = serializers.ReadOnlyField(source='ingredient.name')
-    measurement_unit = serializers.ReadOnlyField(
-        source='ingredient.measurement_unit'
+    id = serializers.CharField(source='ingredient.id')
+    name = serializers.CharField(source='ingredient.name', required=False)
+    measurement_unit = serializers.CharField(
+        source='ingredient.measurement_unit', required=False
     )
 
     class Meta:
@@ -53,12 +54,9 @@ class IngredientsRecipeSerializer(serializers.ModelSerializer):
 class RecipesSerializer(serializers.ModelSerializer):
     author = UserCustomSerializer(read_only=True)
     image = Base64ImageField()
-    ingredients = IngredientsRecipeSerializer(
-        read_only=True,
-        many=True,
-        source='all_ingredients')
-    tags = TagSerializer(many=True,
-                         read_only=True)
+    ingredients = IngredientsRecipeSerializer(many=True,read_only=True,
+                                              source='all_ingredients')
+    tags = TagSerializer(many=True,read_only=True )
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
@@ -84,51 +82,55 @@ class RecipesSerializer(serializers.ModelSerializer):
                 return True
         return False
 
-    def validate(self, attrs):
-        ingredients_data = attrs['ingredients']
-        ingredients = []
-        for ingredient in ingredients_data:
-            ingredient_id = ingredient['id']
-            if ingredient_id in ingredients:
-                raise serializers.ValidationError({
-                    'ingredients': 'Ингридиент повторяется'
-                })
-            ingredients.append(ingredient_id)
-            amount = ingredient['amount']
-            if int(amount) <= 0:
-                raise serializers.ValidationError({
-                    'amount': 'Отрицательное количество ингредиентов'
-                })
-        tags = attrs['tags']
-        if not tags:
-            raise serializers.ValidationError({
-                'tags': 'Выберите тег'
-            })
-        tags = []
-        for tag in tags:
-            if tag in tags:
-                raise serializers.ValidationError({
-                    'tags': 'Тэг повторяется'
-                })
-            tags.append(tag)
-
-        cooking_time = attrs['cooking_time']
-        if int(cooking_time) <= 0:
-            raise serializers.ValidationError({
-                'cooking_time': 'Отрицательное время'
-            })
-        return attrs
+    # def validate(self, attrs):
+    #     print(attrs)
+    #     ingredients_data = attrs['all_ingredients']
+    #     ingredients = []
+    #     for ingredient in ingredients_data:
+    #         ingredient_id = ingredient['ingredient']['id']
+    #         if ingredient_id in ingredients:
+    #             raise serializers.ValidationError({
+    #                 'ingredients': 'Ингридиент повторяется'
+    #             })
+    #         ingredients.append(ingredient_id)
+    #         amount = ingredient['amount']
+    #         if int(amount) <= 0:
+    #             raise serializers.ValidationError({
+    #                 'amount': 'Отрицательное количество ингредиентов'
+    #             })
+    #     tags = attrs['tags']
+    #     if not tags:
+    #         raise serializers.ValidationError({
+    #             'tags': 'Выберите тег'
+    #         })
+    #     tag_set = []
+    #     for tag in tags:
+    #         if tag in tag_set:
+    #             raise serializers.ValidationError({
+    #                 'tags': 'Тэг повторяется'
+    #             })
+    #         tag_set.append(tag)
+    #
+    #     cooking_time = attrs['cooking_time']
+    #     if int(cooking_time) <= 0:
+    #         raise serializers.ValidationError({
+    #             'cooking_time': 'Отрицательное время'
+    #         })
+    #     return attrs
 
     def create(self, validated_data):
         """
         Create and return a new `Snippet` instance,
          given the validated data.
         """
+        print('Validate', validated_data)
         user = self.context.get('request').user
-        author = User.objects.get(username=user)
-        ingredients = self.initial_data.get('ingredients')
-        tags = self.initial_data.get('tags')
-        recipe = Recipes.objects.create(author=author, **validated_data)
+        # author = User.objects.get(username=user)
+        ingredients = self.initial_data.pop('ingredients')
+        tags = self.initial_data.pop('tags')
+        print('Validate NEW', validated_data)
+        recipe = Recipes.objects.create(author=user, **validated_data)
+        recipe.tags.set(tags)
         ingredients_recipe = []
         for ingredient in ingredients:
             ingredient_id = ingredient['id']
@@ -141,8 +143,6 @@ class RecipesSerializer(serializers.ModelSerializer):
             )
             )
         IngredientsRecipe.objects.bulk_create(ingredients_recipe)
-        # for tag in tags:
-        recipe.tags.set(tags)
         return recipe
 
     def update(self, instance, validated_data):
