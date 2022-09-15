@@ -51,7 +51,7 @@ class IngredientsRecipeSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'measurement_unit', 'amount']
 
     def validate(self, attrs):
-        print(attrs)
+        print('ЭТООООООООООО', attrs)
         return attrs
 
 
