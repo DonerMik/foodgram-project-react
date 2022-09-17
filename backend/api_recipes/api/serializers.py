@@ -48,10 +48,6 @@ class IngredientsRecipeSerializer(serializers.ModelSerializer):
         model = IngredientsRecipe
         fields = ['id', 'name', 'measurement_unit', 'amount']
 
-    # def validate(self, attrs):
-    #     print('ЭТООООООООООО', attrs)
-    #     return attrs
-
 
 class RecipesGetSerializer(serializers.ModelSerializer):
     author = UserCustomSerializer()
@@ -64,7 +60,7 @@ class RecipesGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipes
-        fields = ('tags', 'author', 'ingredients',
+        fields = ('id', 'tags', 'author', 'ingredients',
                   'is_favorited', 'is_in_shopping_cart',
                   'name', 'image', 'text', 'cooking_time',
                   )
@@ -92,30 +88,12 @@ class RecipesCreateUpdateSerializer(serializers.ModelSerializer):
         many=True, source='all_ingredients')
     tags = TagSerializer(many=True,
                          read_only=True)
-    # is_favorited = serializers.SerializerMethodField()
-    # is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipes
         fields = ('id', 'tags', 'author', 'ingredients',
-                  # 'is_favorited', 'is_in_shopping_cart',
                   'name', 'image', 'text', 'cooking_time',
                   )
-
-    # def get_is_favorited(self, obj):
-    #     username = self.context.get('request').user
-    #     if username.is_authenticated:
-    #         if username.favorit_recipe.filter(recipes=obj).exists():
-    #             return True
-    #     return False
-    #
-    # def get_is_in_shopping_cart(self, obj):
-    #     user = self.context.get('request').user
-    #     if user.is_authenticated:
-    #         obj_user = User.objects.get(username=user)
-    #         if obj_user.shopping_cart.filter(recipes=obj.id).exists():
-    #             return True
-    #     return False
 
     def validate(self, attrs):
         print(attrs)
@@ -206,9 +184,6 @@ class RecipesCreateUpdateSerializer(serializers.ModelSerializer):
                 ingredient=recipe_ingredient,
                 amount=ingredient_amount
             )
-        # for tag in tags:
-        #     tag_recipe = Tag.objects.get(id=tag)
-        #     instance.tags.add(tag_recipe)
         instance.tags.set(tags)
         instance.save()
         return instance

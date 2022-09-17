@@ -70,29 +70,8 @@ class IngredientsViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
 
 
-class CreateOrDeleteMixIn:
-    ''' Миксин создает или удаляет объект одного класса.
-    Возвращает Response'''
-
-    def create_or_delete_obj(self, request, pk, model):
-        '''Метод создает объект с двумя полями.
-        Первое из которых поле user'''
-        user = request.user
-        recipe = Recipes.objects.get(id=pk)
-        serializer = RecipesShortSerializer(recipe)
-        if request.method == "POST":
-            model.objects.create(user, recipe)
-            return Response(serializer.data)
-        model.objects.get(user, recipe).delete()
-        return Response('удален')
-
-    class Meta:
-        abstract = True
-
-
-class RecipesViewSet(viewsets.ModelViewSet, CreateOrDeleteMixIn):
+class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipes.objects.all()
-    # serializer_class = RecipesSerializer
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipesFilter
@@ -105,41 +84,29 @@ class RecipesViewSet(viewsets.ModelViewSet, CreateOrDeleteMixIn):
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        # user = request.user
-        # recipe = Recipes.objects.get(pk=pk)
-        # serializer = RecipesShortSerializer(recipe)
-        # shiooin = ShoppingCart
         return self.create_or_delete_obj(request, ShoppingCart, pk)
-        # if request.method == "POST":
-        #     ShoppingCart.objects.create(user=user,
-        #                                 recipes=recipe)
-        #
-        #     return Response(serializer.data)
-        # ShoppingCart.objects.get(user=user,
-        #                          recipes=recipe).delete()
-        # return Response('удален')
 
     @action(detail=True, methods=['post', 'delete'],
             permission_classes=[IsAuthenticated],
             filterset_class=RecipesFilter,
             pagination_class=CustomPagination)
     def favorite(self, request, pk=None):
-        # user = request.user
-        # recipe = Recipes.objects.get(pk=pk)
-        # serializer = RecipesShortSerializer(recipe,
-        #                                     context={'request': request})
         return self.create_or_delete_obj(
             request, Favorite, pk)
-        # if request.method == "POST":
-        #     Favorite.objects.create(user=user,
-        #                             recipes=recipe)
-        #
-        #     return Response(serializer.data)
-        # Favorite.objects.get(user=user,
-        #                      recipes=recipe).delete()
-        # return Response('удален')
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
             return RecipesGetSerializer
         return RecipesCreateUpdateSerializer
+
+    def create_or_delete_obj(self, request, model, pk):
+        '''Метод создает объект с двумя полями.
+        Первое из которых поле user'''
+        user = request.user
+        recipe = get_object_or_404(Recipes, id=pk)
+        serializer = RecipesShortSerializer(recipe)
+        if request.method == "POST":
+            model.objects.create(user=user, recipes=recipe)
+            return Response(serializer.data)
+        model.objects.filter(user=user, recipes=recipe).delete()
+        return Response('удален')
