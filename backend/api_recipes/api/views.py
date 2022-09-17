@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -12,9 +12,10 @@ from recipes.models import (Favorite, Ingredient, Recipes,
                             ShoppingCart, Subscribe, Tag)
 from api.filter import IngredientsFilter, RecipesFilter
 from api.paginator import CustomPagination
-from api.serializers import (IngredientSerializer, RecipesSerializer,
+from api.serializers import (IngredientSerializer, RecipesGetSerializer,
                              RecipesShortSerializer, TagSerializer,
                              UserCustomSerializer,
+                             RecipesCreateUpdateSerializer,
                              UsersSubscriptionsSerializer)
 
 User = get_user_model()
@@ -76,7 +77,7 @@ class CreateOrDeleteMixIn:
     def create_or_delete_obj(self, request, pk, model):
         '''Метод создает объект с двумя полями.
         Первое из которых поле user'''
-        user = self.context.get('request').user
+        user = request.user
         recipe = Recipes.objects.get(id=pk)
         serializer = RecipesShortSerializer(recipe)
         if request.method == "POST":
@@ -91,7 +92,7 @@ class CreateOrDeleteMixIn:
 
 class RecipesViewSet(viewsets.ModelViewSet, CreateOrDeleteMixIn):
     queryset = Recipes.objects.all()
-    serializer_class = RecipesSerializer
+    # serializer_class = RecipesSerializer
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipesFilter
@@ -137,3 +138,8 @@ class RecipesViewSet(viewsets.ModelViewSet, CreateOrDeleteMixIn):
         # Favorite.objects.get(user=user,
         #                      recipes=recipe).delete()
         # return Response('удален')
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return RecipesGetSerializer
+        return RecipesCreateUpdateSerializer
