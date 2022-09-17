@@ -21,8 +21,6 @@ class UserCustomSerializer(UserSerializer):
         user = self.context.get('request').user
         if not user.is_authenticated:
             return False
-        # # obj_user = User.objects.get(username=user)
-
         return Subscribe.objects.filter(user=user, author=obj).exists()
 
 

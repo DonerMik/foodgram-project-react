@@ -63,10 +63,9 @@ class Recipes(models.Model):
         verbose_name='Ингридиенты',
         through='IngredientsRecipe',
         through_fields=('recipe', 'ingredient'),
-        blank=True, null=True
     )
     tags = models.ManyToManyField('Tag', related_name='recipes',
-                                  blank=True,null=True
+                                  blank=True,
                                   )
     cooking_time = models.IntegerField(validators=[MinValueValidator(1)],
                                        verbose_name='Время приготовления')
