@@ -66,17 +66,16 @@ class RecipesGetSerializer(serializers.ModelSerializer):
                   )
 
     def get_is_favorited(self, obj):
-        username = self.context.get('request').user
-        if username.is_authenticated:
-            if username.favorit_recipe.filter(recipes=obj).exists():
+        user = self.context.get('request').user
+        if user.is_authenticated:
+            if user.favorit_recipe.filter(recipes=obj).exists():
                 return True
         return False
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get('request').user
         if user.is_authenticated:
-            obj_user = User.objects.get(username=user)
-            if obj_user.shopping_cart.filter(recipes=obj.id).exists():
+            if user.shopping_cart.filter(recipes=obj.id).exists():
                 return True
         return False
 
@@ -95,58 +94,10 @@ class RecipesCreateUpdateSerializer(serializers.ModelSerializer):
                   'name', 'image', 'text', 'cooking_time',
                   )
 
-    def validate(self, attrs):
-        print(attrs)
-        ingredients_data = attrs['all_ingredients']
-        ingredients = []
-        for ingredient in ingredients_data:
-            ingredient_id = ingredient['ingredient']['id']
-            if ingredient_id in ingredients:
-                raise serializers.ValidationError({
-                    'ingredients': 'Ингридиент повторяется'
-                })
-            ingredients.append(ingredient_id)
-            amount = ingredient['amount']
-            if int(amount) <= 0:
-                raise serializers.ValidationError({
-                    'amount': 'Отрицательное количество ингредиентов'
-                })
-        tags = self.initial_data['tags']
-        if not tags:
-            raise serializers.ValidationError({
-                'tags': 'Выберите тег'
-            })
-        tag_set = []
-        for tag in tags:
-            if tag in tag_set:
-                raise serializers.ValidationError({
-                    'tags': 'Тэг повторяется'
-                })
-            tag_set.append(tag)
-
-        cooking_time = attrs['cooking_time']
-        if int(cooking_time) <= 0:
-            raise serializers.ValidationError({
-                'cooking_time': 'Отрицательное время'
-            })
-        return attrs
-
-    def create(self, validated_data):
-        """
-        Create and return a new `Snippet` instance,
-         given the validated data.
-        """
-        print('Validate', validated_data)
-        user = self.context.get('request').user
-        ingredients = validated_data.pop('all_ingredients')
-        tags = self.initial_data.pop('tags')
-        recipe = Recipes.objects.create(author=user,
-                                        **validated_data,)
-
+    def create_ingredients_recipe(self, list_ingredients, recipe,):
         ingredients_recipe = []
-        for ingredient in ingredients:
-
-            ingredient_id = ingredient['ingredient']['id']
+        for ingredient in list_ingredients:
+            ingredient_id = ingredient['id']
             recipe_ingredient = Ingredient.objects.get(id=ingredient_id)
             ingredient_amount = ingredient['amount']
             ingredients_recipe.append(IngredientsRecipe(
@@ -155,9 +106,49 @@ class RecipesCreateUpdateSerializer(serializers.ModelSerializer):
                 amount=ingredient_amount
             )
             )
-        recipe.tags.set(tags)
         IngredientsRecipe.objects.bulk_create(ingredients_recipe)
         return recipe
+
+    def validate(self, attrs):
+        ingredients_data = attrs['all_ingredients']
+        ingredients = []
+        for ingredient in ingredients_data:
+            ingredient_id = ingredient['ingredient']['id']
+            if ingredient_id in ingredients:
+                raise serializers.ValidationError(
+                    'Ингридиент повторяется')
+            ingredients.append(ingredient_id)
+            amount = ingredient['amount']
+            if int(amount) <= 0:
+                raise serializers.ValidationError(
+                    'Отрицательное количество ингредиентов')
+        tags = self.initial_data['tags']
+        if not tags:
+            raise serializers.ValidationError('Выберите тег')
+        tag_set = []
+        for tag in tags:
+            if tag in tag_set:
+                raise serializers.ValidationError('Тэг повторяется')
+            tag_set.append(tag)
+
+        cooking_time = attrs['cooking_time']
+        if int(cooking_time) <= 0:
+            raise serializers.ValidationError(
+                'Отрицательное время')
+        return attrs
+
+    def create(self, validated_data):
+        """
+        Create and return a new `Snippet` instance,
+         given the validated data.
+        """
+        user = self.context.get('request').user
+        ingredients = validated_data.pop('all_ingredients')['ingredient']
+        tags = self.initial_data.pop('tags')
+        recipe = Recipes.objects.create(author=user,
+                                        **validated_data,)
+        recipe.tags.set(tags)
+        return self.create_ingredients_recipe(ingredients, recipe)
 
     def update(self, instance, validated_data):
         """
@@ -174,19 +165,8 @@ class RecipesCreateUpdateSerializer(serializers.ModelSerializer):
             instance.cooking_time)
         IngredientsRecipe.objects.filter(recipe=instance).delete()
         instance.tags.clear()
-        for ingredient in ingredients:
-            ingredient_id = ingredient['id']
-            recipe_ingredient = Ingredient.objects.get(id=ingredient_id)
-            ingredient_amount = ingredient['amount']
-
-            IngredientsRecipe.objects.create(
-                recipe=instance,
-                ingredient=recipe_ingredient,
-                amount=ingredient_amount
-            )
         instance.tags.set(tags)
-        instance.save()
-        return instance
+        return self.create_ingredients_recipe(ingredients, instance)
 
     def to_representation(self, instance):
         request = self.context.get('request')
