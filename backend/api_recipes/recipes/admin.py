@@ -23,6 +23,8 @@ class IngredientAdmin(admin.ModelAdmin):
 
 class IngredientInline(admin.TabularInline):
     model = Recipes.ingredients.through
+    extra = 2
+    min_num = 1
 
 
 class IngredintsAdmin(admin.ModelAdmin):
@@ -34,10 +36,9 @@ class RecipesAdmin(admin.ModelAdmin):
     list_display = ('name', 'author', 'add_favorite')
     search_fields = ('author', 'name', 'tags')
     exclude = ('ingredients',)
-    inlines = [
-        IngredientInline
-    ]
+    inlines = (IngredientInline, )
     ordering = ('-id',)
+    empty_value_display = '-пусто-'
 
     def add_favorite(self, obj):
         return obj.favorit_user.count()

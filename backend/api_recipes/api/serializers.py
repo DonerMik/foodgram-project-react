@@ -143,7 +143,8 @@ class RecipesCreateUpdateSerializer(serializers.ModelSerializer):
          given the validated data.
         """
         user = self.context.get('request').user
-        ingredients = validated_data.pop('all_ingredients')
+        ingredients = self.initial_data.pop('ingredients')
+        validated_data.pop('all_ingredients')
         tags = self.initial_data.pop('tags')
         recipe = Recipes.objects.create(author=user,
                                         **validated_data,)
