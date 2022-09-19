@@ -24,21 +24,28 @@ scp nginx.conf <username>@<host>:/home/<username>/nginx/nginx.conf
 В репозитории на Гитхабе добавьте данные в Settings -> Secrets -> Actions secrets:
 
 -- Docker --
+
 DOCKER_USERNAME - имя пользователя в DockerHub
 DOCKER_PASSWORD - пароль пользователя в DockerHub
+
 -- Server --
+
 HOST - ip-адрес сервера
 USER - пользователь
 SSH_KEY - приватный ssh-ключ (публичный должен быть на сервере)
 PASSPHRASE - кодовая фраза для ssh-ключа (если есть)
+
 -- Database -- 
+
 DB_ENGINE - django.db.backends.postgresql
 DB_HOST - db
 DB_PORT - 5432
 DB_NAME - postgres (по умолчанию)
 POSTGRES_USER - postgres (по умолчанию)
 POSTGRES_PASSWORD - postgres (по умолчанию)
+
 -- Django --
+
 SECRET_KEY - секретный ключ приложения django (необходимо чтобы были экранированы или отсутствовали скобки)
 ALLOWED_HOSTS - список разрешённых адресов
 
