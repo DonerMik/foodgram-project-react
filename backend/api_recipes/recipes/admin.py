@@ -15,12 +15,6 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-# @admin.register(Favorite)
-# class FavoriteAdmin(admin.ModelAdmin):
-#     list_display = ('user', 'recipe',)
-#     list_filter = ('user', 'recipe',)
-
-
 class IngredientInline(admin.TabularInline):
     model = Recipes.ingredients.through
     extra = 2
